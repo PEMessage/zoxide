@@ -89,7 +89,18 @@ impl<'a> Stream<'a> {
         // the database.
         let resolver =
             if self.options.resolve_symlinks { fs::symlink_metadata } else { fs::metadata };
-        resolver(path).map(|metadata| metadata.is_dir()).unwrap_or_default()
+        let metadata = match resolver(path) {
+            Ok(m) => m,
+            Err(_) => return false,
+        };
+
+        if self.options.file_mode {
+            // In file mode: include only files (exclude all directories)
+            metadata.is_file()
+        } else {
+            // Normal mode: include only directories (exclude files)
+            metadata.is_dir()
+        }
     }
 }
 
@@ -109,6 +120,9 @@ pub struct StreamOptions {
     /// Whether to resolve symlinks when checking if a directory exists.
     resolve_symlinks: bool,
 
+    /// When true, only files are included (excludes directories)
+    file_mode: bool,
+
     /// Directories that do not exist and haven't been accessed since TTL will
     /// be lazily removed.
     ttl: Epoch,
@@ -122,6 +136,7 @@ impl StreamOptions {
             exclude: Vec::new(),
             exists: false,
             resolve_symlinks: false,
+            file_mode: false,
             ttl: now.saturating_sub(3 * MONTH),
         }
     }
@@ -147,6 +162,11 @@ impl StreamOptions {
 
     pub fn with_resolve_symlinks(mut self, resolve_symlinks: bool) -> Self {
         self.resolve_symlinks = resolve_symlinks;
+        self
+    }
+
+    pub fn with_file_mode(mut self, file_mode: bool) -> Self {
+        self.file_mode = file_mode;
         self
     }
 }

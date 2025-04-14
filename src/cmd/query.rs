@@ -84,6 +84,9 @@ impl Query {
             let resolve_symlinks = config::resolve_symlinks();
             options = options.with_exists(true).with_resolve_symlinks(resolve_symlinks);
         }
+        if self.file {
+            options = options.with_file_mode(true);
+        }
 
         let stream = Stream::new(db, options);
         Ok(stream)
