@@ -3,7 +3,7 @@ use std::fs;
 use anyhow::{Context, Result, bail};
 
 use crate::cmd::{Import, ImportFrom, Run};
-use crate::db::Database;
+use crate::db::{Database, EntryType};
 
 impl Run for Import {
     fn run(&self) -> Result<()> {
@@ -40,7 +40,7 @@ fn import_autojump(db: &mut Database, buffer: &str) -> Result<()> {
         // take a while to get normalized.
         rank = sigmoid(rank);
 
-        db.add_unchecked(path, rank, 0);
+        db.add_unchecked(path, rank, 0, EntryType::Directory);
     }
 
     if db.dirty() {
@@ -65,7 +65,7 @@ fn import_z(db: &mut Database, buffer: &str) -> Result<()> {
 
         let path = split.next().with_context(|| format!("invalid entry: {line}"))?;
 
-        db.add_unchecked(path, rank, last_accessed);
+        db.add_unchecked(path, rank, last_accessed, EntryType::Directory);
     }
 
     if db.dirty() {
