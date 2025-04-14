@@ -49,15 +49,19 @@ pub enum Cmd {
     Remove(Remove),
 }
 
-/// Add a new directory or increment its rank
+/// Add a new directory/file or increment its rank
 #[derive(Debug, Parser)]
 #[clap(
     author,
     help_template = HelpTemplate,
 )]
 pub struct Add {
-    #[clap(num_args = 1.., required = true, value_hint = ValueHint::DirPath)]
+    #[clap(num_args = 1.., required = true, value_hint = ValueHint::AnyPath)]
     pub paths: Vec<PathBuf>,
+
+    /// Add a file instead of a directory
+    #[clap(long)]
+    pub file: bool,
 }
 
 /// Edit the database
@@ -180,6 +184,9 @@ pub struct Query {
     /// Exclude the current directory
     #[clap(long, value_hint = ValueHint::DirPath, value_name = "path")]
     pub exclude: Option<String>,
+
+    #[clap(long)]
+    pub file: bool,
 }
 
 /// Remove a directory from the database

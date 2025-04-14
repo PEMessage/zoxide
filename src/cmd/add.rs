@@ -3,7 +3,7 @@ use std::path::Path;
 use anyhow::{Result, bail};
 
 use crate::cmd::{Add, Run};
-use crate::db::Database;
+use crate::db::{Database, EntryType};
 use crate::{config, util};
 
 impl Run for Add {
@@ -30,10 +30,15 @@ impl Run for Add {
             if path.contains(EXCLUDE_CHARS) || exclude_dirs.iter().any(|glob| glob.matches(path)) {
                 continue;
             }
-            if !Path::new(path).is_dir() {
-                bail!("not a directory: {path}");
+            if !self.file && !Path::new(path).is_dir() {
+                bail!("not a directory: {path} (use --file flag to add files)");
             }
-            db.add_update(path, 1.0, now);
+            let entry_type = if self.file {
+                EntryType::File
+            } else {
+                EntryType::Directory
+            };
+            db.add_update(path, 1.0, now, entry_type);
         }
 
         if db.dirty() {

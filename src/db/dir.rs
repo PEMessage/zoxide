@@ -6,11 +6,18 @@ use serde::{Deserialize, Serialize};
 use crate::util::{DAY, HOUR, WEEK};
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
+pub enum EntryType {
+    Directory,
+    File,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct Dir<'a> {
     #[serde(borrow)]
     pub path: Cow<'a, str>,
     pub rank: Rank,
     pub last_accessed: Epoch,
+    pub entry_type: EntryType,
 }
 
 impl Dir<'_> {
