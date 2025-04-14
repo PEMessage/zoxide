@@ -3,7 +3,7 @@ use std::io::{self, Write};
 use anyhow::Result;
 
 use crate::cmd::{Edit, EditCommand, Run};
-use crate::db::Database;
+use crate::db::{Database, EntryType};
 use crate::error::BrokenPipeHandler;
 use crate::util::{self, Fzf, FzfChild};
 
@@ -15,11 +15,11 @@ impl Run for Edit {
         match &self.cmd {
             Some(cmd) => {
                 match cmd {
-                    EditCommand::Decrement { path } => db.add(path, -1.0, now),
+                    EditCommand::Decrement { path } => db.add(path, -1.0, now, EntryType::Directory),
                     EditCommand::Delete { path } => {
                         db.remove(path);
                     }
-                    EditCommand::Increment { path } => db.add(path, 1.0, now),
+                    EditCommand::Increment { path } => db.add(path, 1.0, now, EntryType::Directory),
                     EditCommand::Reload => {}
                 }
                 db.save()?;
